@@ -18,7 +18,7 @@ public:
      * @brief constructor: do nothing but construct the superclass
      * 
      */
-    locoman_service_2_module(    int argc, 
+    locoman_service_2_module(  int argc, 
                                char* argv[],
                                std::string module_prefix, 
                                int module_period, 
