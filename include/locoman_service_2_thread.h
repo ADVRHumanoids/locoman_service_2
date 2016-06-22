@@ -13,16 +13,19 @@ class locoman_service_2_thread : public control_thread
 {
 private:  
     
-    yarp::os::BufferedPort<yarp::sig::Vector> from_locoman_thread;
-    
+   // yarp::os::BufferedPort<yarp::sig::Vector> from_locoman_thread;
+   // yarp::sig::Vector* v_from_locoman_thread;
+  
     yarp::os::BufferedPort<yarp::sig::Vector> receiving_q;
     yarp::sig::Vector* receiving_q_vect ;
-
+    
     yarp::os::BufferedPort<yarp::sig::Vector> receiving_fc ;
     yarp::sig::Vector* receiving_fc_vect ;
     
     yarp::os::BufferedPort<yarp::sig::Vector> to_locoman_thread;
-    yarp::sig::Vector* v_from_locoman_thread;
+    //yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_thread;
+
+    yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Matrix;
     
 public:
     int mg =  1200 ;
@@ -117,39 +120,44 @@ public:
     
     yarp::sig::Matrix map_l_fcToSens ;
     yarp::sig::Matrix map_r_fcToSens ;  
- //   yarp::sig::Matrix map_l_hand_fcToSens ;    
- //   yarp::sig::Matrix map_r_hand_fcToSens ;
+    yarp::sig::Matrix map_l_hand_fcToSens ;    
+    yarp::sig::Matrix map_r_hand_fcToSens ;
     
     yarp::sig::Matrix map_l_fcToSens_PINV ;
     yarp::sig::Matrix map_r_fcToSens_PINV ;
- //   yarp::sig::Matrix map_l_hand_fcToSens_PINV ;
- //   yarp::sig::Matrix map_r_hand_fcToSens_PINV ;
+    yarp::sig::Matrix map_l_hand_fcToSens_PINV ;
+    yarp::sig::Matrix map_r_hand_fcToSens_PINV ;
     
     yarp::sig::Vector fc_offset_left ;
     yarp::sig::Vector fc_offset_right ;
     
  //   yarp::sig::Vector fc_offset_left_hand ;
- //   yarp::sig::Vector fc_offset_right_hand ;    
+ //   yarp::sig::Vector fc_offset_right_hand ;   
     
-  yarp::sig::Vector fc_l_c1_filt ; //= FC_FILTERED.subVector(0,2)  ;  // Applied from the robot to the world
-  yarp::sig::Vector fc_l_c2_filt ; //= FC_FILTERED.subVector(3,5)  ;
-  yarp::sig::Vector fc_l_c3_filt ; //= FC_FILTERED.subVector(6,8)  ;
-  yarp::sig::Vector fc_l_c4_filt ; //= FC_FILTERED.subVector(9,11)  ;
+  yarp::sig::Vector fc_l_foot ; //= map_l_fcToSens_PINV*fc_received.subVector(  0,5  ) ;
+  yarp::sig::Vector fc_r_foot ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ;
+  yarp::sig::Vector fc_l_hand ; //= map_l_hand_fcToSens*fc_received.subVector( 12,17  ) ;
+  yarp::sig::Vector fc_r_hand ; //= map_r_hand_fcToSens*fc_received.subVector( 18,23  ) ;  
+    
+  yarp::sig::Vector fc_l1_foot_filt ; //= FC_FILTERED.subVector(0,2)  ;  // Applied from the robot to the world
+  yarp::sig::Vector fc_l2_foot_filt ; //= FC_FILTERED.subVector(3,5)  ;
+  yarp::sig::Vector fc_l3_foot_filt ; //= FC_FILTERED.subVector(6,8)  ;
+  yarp::sig::Vector fc_l4_foot_filt ; //= FC_FILTERED.subVector(9,11)  ;
 
-  yarp::sig::Vector fc_r_c1_filt ; //= FC_FILTERED.subVector(12,14)  ; 
-  yarp::sig::Vector fc_r_c2_filt ; //= FC_FILTERED.subVector(15,17)  ; 
-  yarp::sig::Vector fc_r_c3_filt ; //= FC_FILTERED.subVector(18,20)  ; 
-  yarp::sig::Vector fc_r_c4_filt ; //= FC_FILTERED.subVector(21,23)  ; 
+  yarp::sig::Vector fc_r1_foot_filt ; //= FC_FILTERED.subVector(12,14)  ; 
+  yarp::sig::Vector fc_r2_foot_filt ; //= FC_FILTERED.subVector(15,17)  ; 
+  yarp::sig::Vector fc_r3_foot_filt ; //= FC_FILTERED.subVector(18,20)  ; 
+  yarp::sig::Vector fc_r4_foot_filt ; //= FC_FILTERED.subVector(21,23)  ; 
   
-//   yarp::sig::Vector fc_l1_hand_filt ; //= FC_HANDS_FILTERED.subVector(0,2)  ;  // Applied from the robot to the world
-//   yarp::sig::Vector fc_l2_hand_filt ; // = FC_HANDS_FILTERED.subVector(3,5)  ;
-//   yarp::sig::Vector fc_l3_hand_filt ; //= FC_HANDS_FILTERED.subVector(6,8)  ;
-//   yarp::sig::Vector fc_l4_hand_filt ; //= FC_HANDS_FILTERED.subVector(9,11)  ;
-// 
-//   yarp::sig::Vector fc_r1_hand_filt ; //= FC_HANDS_FILTERED.subVector(12,14)  ; 
-//   yarp::sig::Vector fc_r2_hand_filt ; //= FC_HANDS_FILTERED.subVector(15,17)  ; 
-//   yarp::sig::Vector fc_r3_hand_filt ; //= FC_HANDS_FILTERED.subVector(18,20)  ; 
-//   yarp::sig::Vector fc_r4_hand_filt ; //= FC_HANDS_FILTERED.subVector(21,23)  ;   
+  yarp::sig::Vector fc_l1_hand_filt ; //= FC_HANDS_FILTERED.subVector(0,2)  ;  // Applied from the robot to the world
+  yarp::sig::Vector fc_l2_hand_filt ; // = FC_HANDS_FILTERED.subVector(3,5)  ;
+  yarp::sig::Vector fc_l3_hand_filt ; //= FC_HANDS_FILTERED.subVector(6,8)  ;
+  yarp::sig::Vector fc_l4_hand_filt ; //= FC_HANDS_FILTERED.subVector(9,11)  ;
+
+  yarp::sig::Vector fc_r1_hand_filt ; //= FC_HANDS_FILTERED.subVector(12,14)  ; 
+  yarp::sig::Vector fc_r2_hand_filt ; //= FC_HANDS_FILTERED.subVector(15,17)  ; 
+  yarp::sig::Vector fc_r3_hand_filt ; //= FC_HANDS_FILTERED.subVector(18,20)  ; 
+  yarp::sig::Vector fc_r4_hand_filt ; //= FC_HANDS_FILTERED.subVector(21,23)  ;   
 
   yarp::sig::Matrix T_w_aw_0 ; //= locoman::utils::AW_world_posture(model, robot) ;
   yarp::sig::Matrix T_aw_w_0 ; //= locoman::utils::iHomogeneous(T_w_aw_0) ;    
@@ -169,20 +177,20 @@ public:
   yarp::sig::Matrix T_w_r_c3_0   ; // = model.iDyn3_model.getPosition(r_c3_index)    ;
   yarp::sig::Matrix T_w_r_c4_0   ; // = model.iDyn3_model.getPosition(r_c4_index)    ;   
     
-//   yarp::sig::Matrix T_w_l_hand_0  ; //= model.iDyn3_model.getPosition( l_hand_index ) ;
-//   yarp::sig::Matrix T_w_r_hand_0  ; //= model.iDyn3_model.getPosition( r_hand_index ) ;   
-// 
-//   yarp::sig::Matrix T_w_l_wrist_0 ; //= model.iDyn3_model.getPosition(l_wrist_index) ;
-//   yarp::sig::Matrix T_w_l1_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c1_index)    ;    
-//   yarp::sig::Matrix T_w_l2_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c2_index)    ;  
-//   yarp::sig::Matrix T_w_l3_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c3_index)    ;
-//   yarp::sig::Matrix T_w_l4_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c4_index)    ;    
-//     
-//   yarp::sig::Matrix T_w_r_wrist_0 ; //= model.iDyn3_model.getPosition(r_wrist_index) ;
-//   yarp::sig::Matrix T_w_r1_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c1_index)    ;    
-//   yarp::sig::Matrix T_w_r2_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c2_index)    ;  
-//   yarp::sig::Matrix T_w_r3_hand_0 ;  // = model.iDyn3_model.getPosition(r_hand_c3_index)    ;
-//   yarp::sig::Matrix T_w_r4_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c4_index)    ;     
+  yarp::sig::Matrix T_w_l_hand_0  ; //= model.iDyn3_model.getPosition( l_hand_index ) ;
+  yarp::sig::Matrix T_w_r_hand_0  ; //= model.iDyn3_model.getPosition( r_hand_index ) ;   
+
+  yarp::sig::Matrix T_w_l_wrist_0 ; //= model.iDyn3_model.getPosition(l_wrist_index) ;
+  yarp::sig::Matrix T_w_l1_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c1_index)    ;    
+  yarp::sig::Matrix T_w_l2_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c2_index)    ;  
+  yarp::sig::Matrix T_w_l3_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c3_index)    ;
+  yarp::sig::Matrix T_w_l4_hand_0 ; //= model.iDyn3_model.getPosition(l_hand_c4_index)    ;    
+    
+  yarp::sig::Matrix T_w_r_wrist_0 ; //= model.iDyn3_model.getPosition(r_wrist_index) ;
+  yarp::sig::Matrix T_w_r1_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c1_index)    ;    
+  yarp::sig::Matrix T_w_r2_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c2_index)    ;  
+  yarp::sig::Matrix T_w_r3_hand_0 ;  // = model.iDyn3_model.getPosition(r_hand_c3_index)    ;
+  yarp::sig::Matrix T_w_r4_hand_0 ; //= model.iDyn3_model.getPosition(r_hand_c4_index)    ;     
 //   
   // -----------------------------------------------------------------------
   yarp::sig::Matrix T_waist_w_0   ; //= locoman::utils::iHomogeneous(T_w_waist_0)  ;
@@ -238,6 +246,11 @@ public:
   //--------------------------------------------------
   
    // Jacobian Matrices 
+  yarp::sig::Matrix J_feet ;   //  ( 24 , size_q + 6)  ;
+  yarp::sig::Matrix J_c ;      //  ( 24 , size_q ) ;
+  yarp::sig::Matrix S_c_T ;    //  ( 24 , 6 ) ; 
+  yarp::sig::Matrix S_c ;      //  ( 6 , 24 )   ; // = S_c_T.transposed() ;  
+
   yarp::sig::Matrix J_l_c1_mix_0 ; //( 6, ( size_q + 6 ) ) ; //
   yarp::sig::Matrix J_l_c2_mix_0 ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ; 
   yarp::sig::Matrix J_l_c3_mix_0 ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ; 
@@ -337,6 +350,13 @@ public:
   yarp::sig::Matrix U_aw_s_c_f_rh ; //( 6 , 6) ; // = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
   yarp::sig::Matrix Q_aw_s_c_f_rh ; //( 6 , size_q ) ; //  = Q_aw_c.submatrix( 0  , 5,  6,  (Q_aw_c.cols()-1)  ) ;
   //----------------------------------------------------------------------------------------
+  
+  yarp::sig::Matrix FLMM   ;   //    (30, size_q + 30)  ;  //= locoman::utils::FLMM_redu(J_c, S_c, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
+  yarp::sig::Matrix cFLMM  ;   //   ( 30, size_q + 30 ) ;
+  yarp::sig::Matrix Rf     ;   //   (24, size_q)   ; 
+  yarp::sig::Matrix Rf_filt  ; //   (24, size_q) ;
+  yarp::sig::Matrix Rf_filt_pinv  ; //   ( size_q, 24) ;
+  
   yarp::sig::Vector d_fc_des_to_world ; //(size_fc)  ;
   yarp::sig::Vector d_EE_r_des ; //(6,0.0) ;
   yarp::sig::Vector d_EE_l_des ; //(6,0.0) ;

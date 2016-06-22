@@ -7,12 +7,33 @@ Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/walkman/walkman/build/drc/locoman_service_2/
-Build Type=Release
+Build Directory Path=file:///home/edo/robotology-superbuild/build/robots/locoman_service_2
+Build Type=Debug
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
 Extra Arguments=
-Install Directory=file:///home/walkman/walkman/build/install
+Install Directory=file:///home/edo/robotology-superbuild/build/install
+
+[Launch]
+Launch Configurations=Launch Configuration 0
+
+[Launch][Launch Configuration 0]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=service2
+Type=Native Application
+
+[Launch][Launch Configuration 0][Data]
+Arguments=
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+Dependency Action=Nothing
+EnvironmentGroup=default
+Executable=file:///home/edo/robotology-superbuild/robots/locoman_service_2/
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+Project Target=locoman_service_2,locoman_service_2
+Use External Terminal=false
+Working Directory=
+isExecutable=false
 
 [MakeBuilder]
 Additional Options=install
