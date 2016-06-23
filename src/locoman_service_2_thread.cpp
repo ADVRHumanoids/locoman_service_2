@@ -25,6 +25,8 @@ locoman_service_2_thread::locoman_service_2_thread(
                              			std::shared_ptr< paramHelp::ParamHelperServer > ph) :
                                         control_thread( module_prefix, rf, ph ),
     size_q(robot.getNumberOfKinematicJoints()),
+    q_sensed(size_q, 0.0) ,
+    
     CoM_w_cmd(3, 0.0) ,
     CoM_w_up(3, 0.0) ,
     CoM_w_dw(3, 0.0) ,
@@ -38,11 +40,11 @@ locoman_service_2_thread::locoman_service_2_thread(
     FC_WINDOW(FC_size, WINDOW_size ) ,
     //
     FC_HANDS_DES(FC_HANDS_size, 0.0) ,
-  //  FC_DES_LEFT_HAND_sensor(6, 0.0) ,
-   // FC_DES_RIGHT_HAND_sensor(6, 0.0) ,
- //   FC_HANDS_FILTERED(FC_HANDS_size) ,
- //   FC_HANDS_WINDOW(FC_HANDS_size, WINDOW_size ) ,
-    //---------------------------------
+  
+    fc_sensors_received(24, 0.0),
+    
+
+  //---------------------------------
     // number of fc components on the feet
     zero_3(3, 0.0) ,
     Zeros_6_6(6,6) ,
@@ -348,7 +350,8 @@ bool locoman_service_2_thread::custom_init()
      { std::cout << "ERROR: cannot open YARP port " << std::string(get_module_prefix() + "/receiving_fc") << std::endl;
         return false; }    
     
-    to_locoman_thread.open(std::string("/" + get_module_prefix() + "/test_output")); 
+    //protorype
+   // to_locoman_thread.open(std::string("/" + get_module_prefix() + "/test_output")); 
 
     
     to_locoman_Matrix.open(std::string("/" + get_module_prefix() + "/sending_Matrix"));   
@@ -677,31 +680,25 @@ bool locoman_service_2_thread::custom_init()
 
 void locoman_service_2_thread::run()
 {   
+    cout_print = 1 ;
+    tic = locoman::utils::Tic() ;
     // Receiving form yarp port
    // v_from_locoman_thread = from_locoman_thread.read();
-    receiving_q_vect = receiving_q.read() ;             // TODO presetting the dimension of the vector...
-    yarp::sig::Vector q_sensed = *receiving_q_vect ;    // TODO predefine the vector
-    
-    
-    
-    
-    
+    receiving_q_vect = receiving_q.read() ;             // 
+    q_sensed = *receiving_q_vect ;    // TODO predefine the vector
+
     robot.idynutils.updateiDyn3Model( q_sensed, true ); 
     //
-    receiving_fc_vect = receiving_fc.read() ;            // TODO presetting the dimension of the vector...
-    yarp::sig::Vector fc_received = *receiving_fc_vect ; // sensor measures (after filetering and offset);  TODO predefine the vector
+    receiving_fc_vect = receiving_fc.read() ;            // 
+    fc_sensors_received = *receiving_fc_vect ; // sensor measures (after filetering and offset);  
     
-    std::cout << "q_sensed = "  << q_sensed.toString() << std::endl ; 
-    std::cout << "fc_received = "  << fc_received.toString() << std::endl ;  
+     if(cout_print){ std::cout << "q_sensed = "  << q_sensed.toString() << std::endl ; 
+		     std::cout << "fc_received = "  << fc_sensors_received.toString() << std::endl ;  }
 // 
-//     std::cout << "    map_l_fcToSens_PINV.rows() = "  <<   map_l_fcToSens_PINV.rows() << std::endl ;  
-//     
-//     std::cout << "    map_l_fcToSens_PINV.cols() = "  <<   map_l_fcToSens_PINV.cols() << std::endl ;  
-    
-    fc_l_foot = map_l_fcToSens_PINV*fc_received.subVector(  0,5   ) ;
-    fc_r_foot = map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ;
-    fc_l_hand = map_l_hand_fcToSens_PINV *fc_received.subVector( 12,17  ) ;
-    fc_r_hand = map_r_hand_fcToSens_PINV *fc_received.subVector( 18,23  ) ;
+    fc_l_foot = map_l_fcToSens_PINV      * fc_sensors_received.subVector(  0,5   ) ;
+    fc_r_foot = map_r_fcToSens_PINV      * fc_sensors_received.subVector(  6,11  ) ;
+    fc_l_hand = map_l_hand_fcToSens_PINV * fc_sensors_received.subVector( 12,17  ) ;
+    fc_r_hand = map_r_hand_fcToSens_PINV * fc_sensors_received.subVector( 18,23  ) ;
     
     fc_l1_foot_filt = fc_l_foot.subVector( 0,2 )  ;
     fc_l2_foot_filt = fc_l_foot.subVector( 3,5 )  ;
@@ -856,43 +853,35 @@ void locoman_service_2_thread::run()
   Rf = cFLMM.submatrix(0, size_fc-1, cFLMM.cols()-size_q, cFLMM.cols()-1) ;  
   Rf_filt = locoman::utils::filter_SVD( Rf ,  1E-10); 
   
-  double regu_filter = 1E6 ; 
-  Rf_filt_pinv = locoman::utils::Pinv_Regularized( Rf_filt, regu_filter) ;
   
   
-  yarp::sig::Vector d_q_dsp_6 = -1.0*Rf_filt_pinv* d_fc_des_to_world ;
-  std::cout << " d_q_dsp_6  =  "<< std::endl << d_q_dsp_6.toString() << std::endl  ;  
+  //------------------------------------------------------------------------
+
+  yarp::sig::Vector d_q_dsp_6 = q_sensed ; // a test... adn remove it!
   d_q_dsp_6[0] = 1.0 ;
   d_q_dsp_6[d_q_dsp_6.length()-1] = 1.0 ;  
   
+  if(cout_print){ std::cout << " d_q_dsp_6  =  "<< std::endl << d_q_dsp_6.toString() << std::endl  ;  }
+  
   //------------------------------------------------------------------------
   // ... sending back 
-  yarp::sig::Matrix Rf_temp(2,2) ;
-  Rf_temp.zero();
-  Rf_temp[0][0] = 1.0 ;
-  Rf_temp[1][1] = 1.0 ;
+
   
-  
-  //yarp::sig::Vector q_sensed_2 = d_q_dsp_6 ;
-    
-  yarp::sig::Vector &data = to_locoman_thread.prepare();
-    data.resize(d_q_dsp_6.size());
-  data = d_q_dsp_6;
-  to_locoman_thread.write();
-  
-//   yarp::sig::Matrix &data = to_locoman_thread.prepare();
-//   data.resize(Rf_temp.rows(), Rf_temp.cols());
-//   data = Rf_temp ;
+    // Prototype of the sending back port
+//   yarp::sig::Vector &data = to_locoman_thread.prepare();
+//   data.resize(q_sensed.size());
+//   data = q_sensed;
 //   to_locoman_thread.write();
+  
 
   yarp::sig::Matrix &data_Matrix = to_locoman_Matrix.prepare();
-  data_Matrix.resize(Rf_temp.rows(), Rf_temp.cols());
-  data_Matrix = Rf_temp ;
+  data_Matrix.resize(Rf_filt.rows(), Rf_filt.cols());
+  data_Matrix = Rf_filt ;
   to_locoman_Matrix.write();  
   
   
-  
-  
+  toc = locoman::utils::Toc(tic) ;
+  if(1){std::cout << "tic-toc = " << toc << " seconds" << std::endl ;}
   
   
   

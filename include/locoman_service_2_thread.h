@@ -22,7 +22,8 @@ private:
     yarp::os::BufferedPort<yarp::sig::Vector> receiving_fc ;
     yarp::sig::Vector* receiving_fc_vect ;
     
-    yarp::os::BufferedPort<yarp::sig::Vector> to_locoman_thread;
+    // Prorotype
+    //yarp::os::BufferedPort<yarp::sig::Vector> to_locoman_thread;
     //yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_thread;
 
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Matrix;
@@ -54,6 +55,10 @@ public:
     unsigned int r_hand_c3_index ;
     unsigned int r_hand_c4_index ;
     
+    bool cout_print = 1 ;
+    
+    double tic = 0.0 ;
+    double toc = 0.0 ;
       //--------------
     yarp::sig::Vector CoM_waist_cmd  ;  
     yarp::sig::Matrix T_waist_l1_foot_cmd ; 
@@ -62,6 +67,10 @@ public:
     yarp::sig::Matrix T_waist_r_hand_cmd ; 
     yarp::sig::Matrix R_waist_aw_cmd ;     
     
+    
+    yarp::sig::Vector q_sensed ;
+    
+    yarp::sig::Vector fc_sensors_received ;
     //----------------
     
     yarp::sig::Vector CoM_w_cmd ;  // variables registered at command time
