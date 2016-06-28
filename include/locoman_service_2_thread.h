@@ -29,6 +29,8 @@ private:
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Matrix;
     
 public:
+    //iDynUtils new_Robot ; //   iDynUtils new_Robot("new_Robot",get_urdf_path(),get_srdf_path()) ;
+
     int mg =  1200 ;
     unsigned int size_q ;
     unsigned int waist_index ;
@@ -256,9 +258,9 @@ public:
   
    // Jacobian Matrices 
   yarp::sig::Matrix J_feet ;   //  ( 24 , size_q + 6)  ;
-  yarp::sig::Matrix J_c ;      //  ( 24 , size_q ) ;
-  yarp::sig::Matrix S_c_T ;    //  ( 24 , 6 ) ; 
-  yarp::sig::Matrix S_c ;      //  ( 6 , 24 )   ; // = S_c_T.transposed() ;  
+  yarp::sig::Matrix J_c_feet ;      //  ( 24 , size_q ) ;
+  yarp::sig::Matrix S_c_feet_T ;    //  ( 24 , 6 ) ; 
+  yarp::sig::Matrix S_c_feet ;      //  ( 6 , 24 )   ; // = S_c_T.transposed() ;  
 
   yarp::sig::Matrix J_l_c1_mix_0 ; //( 6, ( size_q + 6 ) ) ; //
   yarp::sig::Matrix J_l_c2_mix_0 ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ; 
