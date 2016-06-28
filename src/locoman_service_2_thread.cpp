@@ -65,6 +65,8 @@ locoman_service_2_thread::locoman_service_2_thread(
     
   fc_l_foot(12, 0.0), // ; //= map_l_fcToSens_PINV*fc_received.subVector(  0,5  ) ;
   fc_r_foot(12, 0.0), // ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ;
+  fc_feet(24, 0.0),
+    
   fc_l_hand(12, 0.0), // ; //= map_l_hand_fcToSens*fc_received.subVector( 12,17  ) ;
   fc_r_hand(12, 0.0), // ;
     
@@ -181,7 +183,8 @@ locoman_service_2_thread::locoman_service_2_thread(
   T_aw_r4_hand_0(4,4) , //  = T_aw_w_0 * T_w_r4_hand_0 ;   
     
   //-----------------------------------------------------
-  J_feet( 24 , size_q + 6)  ,
+  Complete_Jac_feet( 24 , size_q + 6) ,  //( 8*B.cols() , size_q + 6) ;
+  //J_feet( 24 , size_q + 6)  ,
   J_c_feet( 24 , size_q ) ,
   S_c_feet_T( 24 , 6 ) , 
   S_c_feet( 6 , 24 )   , // = S_c_T.transposed() ;  
@@ -297,6 +300,11 @@ locoman_service_2_thread::locoman_service_2_thread(
   J_com_w_redu( 3,  ( size_q + 6 )  ) , //( robot.getNumberOfKinematicJoints() + 6 ))   ;
   J_com_aw( 3,  ( size_q + 6 ) ) , //( robot.getNumberOfKinematicJoints() + 6 ))   ;
   J_com_waist( 3,  ( size_q + 6 ) ) , //robot.getNumberOfKinematicJoints() + 6 ))   ;
+ 
+  J_com_w_q_i( 6, ( size_q + 6 ) ) ,  //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ;
+  J_com_w_redu_q_i( 3,  ( size_q + 6 )  ) ,  //( 3,  ( size_q + 6 )  ) ; //( robot.getNumberOfKinematicJoints() + 6 ))   ;
+  J_com_aw_q_i( 3,  ( size_q + 6 ) ) ,
+ 
   J_r_c1_aw( 6, ( size_q + 6 ) ) , //robot.getNumberOfKinematicJoints() + 6 ) ) ;
   J_l_c1_aw( 6, ( size_q + 6 ) )   //robot.getNumberOfKinematicJoints() + 6 ) ) ;
   
@@ -549,7 +557,8 @@ bool locoman_service_2_thread::custom_init()
   T_aw_r4_hand_0.zero()  ;
     
    //  Jacobian Matrices 
-  J_feet.zero() ; 
+  // J_feet.zero() ; 
+  Complete_Jac_feet.zero(); 
   J_c_feet.zero()    ; 
   S_c_feet_T.zero()  ;
   S_c_feet.zero()    ;
@@ -663,6 +672,11 @@ bool locoman_service_2_thread::custom_init()
   J_com_w_redu.zero()  ;
   J_com_aw.zero()  ;
   J_com_waist.zero()  ;
+  
+  J_com_w_q_i.zero()   ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ;
+  J_com_w_redu_q_i.zero() ;  //( 3,  ( size_q + 6 )  ) ; //( robot.getNumberOfKinematicJoints() + 6 ))   ;
+  J_com_aw_q_i.zero() ;
+  
   J_r_c1_aw.zero()  ;
   J_l_c1_aw.zero()  ;
   
@@ -711,6 +725,9 @@ void locoman_service_2_thread::run()
 // 
     fc_l_foot = map_l_fcToSens_PINV      * fc_sensors_received.subVector(  0,5   ) ;
     fc_r_foot = map_r_fcToSens_PINV      * fc_sensors_received.subVector(  6,11  ) ;
+    fc_feet.setSubvector(0, fc_l_foot) ;
+    fc_feet.setSubvector(fc_l_foot.length() , fc_r_foot) ;
+    
 //     fc_l_hand = map_l_hand_fcToSens_PINV * fc_sensors_received.subVector( 12,17  ) ;
 //     fc_r_hand = map_r_hand_fcToSens_PINV * fc_sensors_received.subVector( 18,23  ) ;
     
@@ -942,21 +959,18 @@ void locoman_service_2_thread::run()
    
   //Stance and Jacobian Matrices
        
-  yarp::sig::Matrix Complete_Jac( 8*B.cols() , size_q + 6) ;
-  
-  Complete_Jac.setSubmatrix( B.transposed()*J_l_c1_body_0 , 0 ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_l_c2_body_0 , B.cols() ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_l_c3_body_0 , 2*B.cols() ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_l_c4_body_0 , 3*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_l_c1_body_0 , 0 ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_l_c2_body_0 , B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_l_c3_body_0 , 2*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_l_c4_body_0 , 3*B.cols() ,0 )  ;
 
-  Complete_Jac.setSubmatrix( B.transposed()*J_r_c1_body_0 , 4*B.cols() ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_r_c2_body_0 , 5*B.cols() ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_r_c3_body_0 , 6*B.cols() ,0 )  ;
-  Complete_Jac.setSubmatrix( B.transposed()*J_r_c4_body_0 , 7*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_r_c1_body_0 , 4*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_r_c2_body_0 , 5*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_r_c3_body_0 , 6*B.cols() ,0 )  ;
+  Complete_Jac_feet.setSubmatrix( B.transposed()*J_r_c4_body_0 , 7*B.cols() ,0 )  ;
 
-  
-  J_c_feet   = Complete_Jac.submatrix( 0,  Complete_Jac.rows()-1 , 6, Complete_Jac.cols()-1 ) ;
-  S_c_feet_T = Complete_Jac.submatrix( 0,  Complete_Jac.rows()-1 , 0, 5 ) ;
+  J_c_feet   = Complete_Jac_feet.submatrix( 0,  Complete_Jac_feet.rows()-1 , 6, Complete_Jac_feet.cols()-1 ) ;
+  S_c_feet_T = Complete_Jac_feet.submatrix( 0,  Complete_Jac_feet.rows()-1 , 0, 5 ) ;
   S_c_feet   = S_c_feet_T.transposed() ;
     
 //   yarp::sig::Matrix Complete_Jac_f_rh( 12*B.cols() , size_q + 6) ;
@@ -999,45 +1013,35 @@ void locoman_service_2_thread::run()
 //   Q_aw_r3_hand = locoman::utils::Q_ci(J_aw_r3_hand_spa_0, T_aw_r3_hand_0, fc_r3_hand_filt ) ; //(size_q+ 6, size_q + 6) ; 
 //   Q_aw_r4_hand = locoman::utils::Q_ci(J_aw_r4_hand_spa_0, T_aw_r4_hand_0, fc_r4_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
 
+  //-----------------------------------------------------------------------------------------------------------------------------
+  // Derivative terms of the gravitational term
+  
+  yarp::sig::Vector mg_vect(3,0.0) ;
+  mg_vect[2] = -mg ;
+  yarp::sig::Matrix Q_mg = locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ;
+    
+  //------------------------------------------------------------------------------------------------------
+  
   Q_aw_l_tot = Q_aw_l_c1 + Q_aw_l_c2 + Q_aw_l_c3 + Q_aw_l_c4;
   Q_aw_r_tot = Q_aw_r_c1 + Q_aw_r_c2 + Q_aw_r_c3 + Q_aw_r_c4;
   //Q_aw_r_hand_tot = Q_aw_r1_hand + Q_aw_r2_hand + Q_aw_r3_hand + Q_aw_r4_hand;
 
-  Q_aw_c =  Q_aw_l_tot + Q_aw_r_tot ;  
+  Q_aw_c =  Q_aw_l_tot + Q_aw_r_tot + Q_mg ;  
 
   U_aw_s_cont = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
   Q_aw_s_cont = Q_aw_c.submatrix( 0  , 5,  6,  (Q_aw_c.cols()-1)  ) ;
 
-  // TODO : Q_g
-  
-
-    
-//     FLMM  = locoman::utils::FLMM_redu(J_c_2, S_c_2, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
-//   cFLMM = locoman::utils::Pinv_trunc_SVD( FLMM.submatrix(0, FLMM.rows()-1 , 0, FLMM.rows()-1), 1E-10 ) * FLMM;
-//   //cFLMM =    yarp::math::luinv(FLMM.submatrix(0, FLMM.rows()-1 , 0, FLMM.rows()-1)) * FLMM;
-// 
-//   Rf = cFLMM.submatrix(0, size_fc-1, cFLMM.cols()-size_q, cFLMM.cols()-1) ;  
-//   Rf_filt = locoman::utils::filter_SVD( Rf ,  1E-10); 
-//   
-//     if(cout_print){
-//     std::cout << "Rf_filt.rows() = " << Rf_filt.rows() << std::endl ;
-//     std::cout << "Rf_filt.cols() = " << Rf_filt.cols() << std::endl ;
-//     std::cout << "Rf_filt.toString()  OLD STYLE = " <<  std::endl << Rf_filt.toString() << std::endl ;    
-//   }      
-//     
-  
-  
-//     
-//    TODO : introdurre inverswa tramite QR
+  //-----------------------------------------------------------------------------------------------------------------------------------------------
   
   Rf_filt = locoman::utils::Rf_redu(J_c_feet, S_c_feet, Q_aw_s_cont, U_aw_s_cont, Kc ) ; 
-  
-      if(cout_print){
+     /* if(cout_print){
     std::cout << "Rf_filt.rows() = " << Rf_filt.rows() << std::endl ;
     std::cout << "Rf_filt.cols() = " << Rf_filt.cols() << std::endl ;
-   std::cout << "Rf_filt.toString() direct = " <<  std::endl << Rf_filt.toString() << std::endl ;    
-    }   
-  
+    std::cout << "Rf_filt.toString() direct = " <<  std::endl << Rf_filt.toString() << std::endl ;    
+    }*/   
+  Rf_filt = locoman::utils::filter_SVD( Rf_filt ,  1E-10); 
+   //std::cout << "Rf_filt.toString() FILTERED = " <<  std::endl << Rf_filt.toString() << std::endl ;    
+
 
   //------------------------------------------------------------------------
 /*
@@ -1198,12 +1202,81 @@ void locoman_service_2_thread::run()
 //   
 //   U_aw_s_cont = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
 //   Q_aw_s_cont = Q_aw_c.submatrix( 0  , 5,  6,  (Q_aw_c.cols()-1)  ) ;
+//  
+//     FLMM  = locoman::utils::FLMM_redu(J_c_2, S_c_2, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
+//   cFLMM = locoman::utils::Pinv_trunc_SVD( FLMM.submatrix(0, FLMM.rows()-1 , 0, FLMM.rows()-1), 1E-10 ) * FLMM;
+//   //cFLMM =    yarp::math::luinv(FLMM.submatrix(0, FLMM.rows()-1 , 0, FLMM.rows()-1)) * FLMM;
+// 
+//   Rf = cFLMM.submatrix(0, size_fc-1, cFLMM.cols()-size_q, cFLMM.cols()-1) ;  
+//   Rf_filt = locoman::utils::filter_SVD( Rf ,  1E-10); 
+//   
+//     if(cout_print){
+//     std::cout << "Rf_filt.rows() = " << Rf_filt.rows() << std::endl ;
+//     std::cout << "Rf_filt.cols() = " << Rf_filt.cols() << std::endl ;
+//     std::cout << "Rf_filt.toString()  OLD STYLE = " <<  std::endl << Rf_filt.toString() << std::endl ;    
+//   }      
 //     
+  
 //   ------------------------------------------------------------------------
     
     
     
-    //
+    
+    
+    
+    
+//   //----------------------------------------------------------------------------------------
+//   // Q_g  Computation with a -for- loop 
+//   
+//   
+//   // Computing tau_com
+//   
+//   yarp::sig::Vector q_h = q_sensed ;
+//   double h_incremental = std::pow(std::numeric_limits<double>::epsilon(), 1.0/2.0);
+// 
+//   
+//   yarp::sig::Vector mg_vect(3,0.0) ;
+//   mg_vect[2] = -mg ;
+//   
+//   model.iDyn3_model.getCOMJacobian(J_com_w) ;
+//   J_com_w_redu = J_com_w.submatrix(0,2 , 0 , J_com_w.cols()-1 ) ;  
+//   J_com_aw     = locoman::utils::getRot(T_aw_w_0) *J_com_w_redu; 
+// 
+//   yarp::sig::Vector tau_mg_0 = J_com_aw.transposed()*mg_vect ;
+//   
+//   yarp::sig::Vector tau_mg_q_i( tau_mg_0.length(), 0.0 ) ;// = tau_mg_0 ;
+//   
+//   yarp::sig::Vector tau_mg_differential_i( tau_mg_0.length(), 0.0 )  ;
+//   
+//   yarp::sig::Matrix Q_mg(tau_mg_0.length(),tau_mg_0.length()) ; 
+//   yarp::sig::Matrix Rot_aw_w_0 = locoman::utils::getRot(T_aw_w_0)  ;
+//   
+//   for(int i=0; i<q_sensed.length() ; i++ ){
+//    tau_mg_q_i.zero();
+//    q_h = q_sensed ;
+//    q_h[i] += h_incremental ;
+//    robot.idynutils.updateiDyn3Model( q_h, true );  // model.iDyn3_model.idynutils.updateiDyn3Model ;
+//    model.iDyn3_model.getCOMJacobian(J_com_w_q_i) ;
+//    J_com_w_redu_q_i = J_com_w_q_i.submatrix(0,2 , 0 , J_com_w_q_i.cols()-1 ) ;  
+//    J_com_aw_q_i = Rot_aw_w_0 *J_com_w_redu_q_i ; 
+//    tau_mg_q_i = J_com_aw_q_i.transposed() * mg_vect ;
+//    tau_mg_differential_i = (tau_mg_q_i - tau_mg_0)/h_incremental ;
+//    Q_mg.setCol( i, tau_mg_differential_i ) ;
+//    
+//   } 
+//   robot.idynutils.updateiDyn3Model( q_sensed, true ); 
+// 
+//     
+//   yarp::sig::Matrix Q_mg_diff = Q_mg- Q_mg_2 ;
+//   Q_mg_diff.resize(Q_mg_diff.cols()*Q_mg_diff.rows() , 1);
+//   yarp::sig::Vector Q_mg_diff_vect = Q_mg_diff.getCol(0)  ;
+//   double max_q_mg_diff = yarp::math::findMax(Q_mg_diff_vect) ;
+//   double min_q_mg_diff = yarp::math::findMin(Q_mg_diff_vect) ;
+//       std::cout << "max_q_mg_diff  = " << max_q_mg_diff << std::endl ;
+//       std::cout << "min_q_mg_diff  = " << min_q_mg_diff << std::endl ;
+//   
+    
+    //---------------------------------------------------------------------------------------------------
 
   //  std::cout << "robot name = "  <<  robot.idynutils.getRobotName() << std::endl ; 
     

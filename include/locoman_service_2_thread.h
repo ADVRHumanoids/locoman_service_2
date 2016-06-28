@@ -127,8 +127,6 @@ public:
     yarp::sig::Vector ft_l_wrist ;
     yarp::sig::Vector ft_r_wrist ;
     
-    
-    
     yarp::sig::Matrix map_l_fcToSens ;
     yarp::sig::Matrix map_r_fcToSens ;  
     yarp::sig::Matrix map_l_hand_fcToSens ;    
@@ -146,7 +144,9 @@ public:
  //   yarp::sig::Vector fc_offset_right_hand ;   
     
   yarp::sig::Vector fc_l_foot ; //= map_l_fcToSens_PINV*fc_received.subVector(  0,5  ) ;
-  yarp::sig::Vector fc_r_foot ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ;
+  yarp::sig::Vector fc_r_foot ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ; 
+  yarp::sig::Vector fc_feet ;
+  
   yarp::sig::Vector fc_l_hand ; //= map_l_hand_fcToSens*fc_received.subVector( 12,17  ) ;
   yarp::sig::Vector fc_r_hand ; //= map_r_hand_fcToSens*fc_received.subVector( 18,23  ) ;  
     
@@ -257,7 +257,10 @@ public:
   //--------------------------------------------------
   
    // Jacobian Matrices 
-  yarp::sig::Matrix J_feet ;   //  ( 24 , size_q + 6)  ;
+  
+  yarp::sig::Matrix Complete_Jac_feet ; //( 8*B.cols() , size_q + 6) ;    //  ( 24 , size_q + 6)  ;
+  
+ // yarp::sig::Matrix J_feet ;  
   yarp::sig::Matrix J_c_feet ;      //  ( 24 , size_q ) ;
   yarp::sig::Matrix S_c_feet_T ;    //  ( 24 , 6 ) ; 
   yarp::sig::Matrix S_c_feet ;      //  ( 6 , 24 )   ; // = S_c_T.transposed() ;  
@@ -378,6 +381,11 @@ public:
   yarp::sig::Matrix J_com_aw ; //( 3,  ( size_q + 6 ) ) ; //( robot.getNumberOfKinematicJoints() + 6 ))   ;
   yarp::sig::Matrix J_com_waist ; //( 3,  ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ))   ;
 
+  yarp::sig::Matrix J_com_w_q_i ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ;
+  yarp::sig::Matrix J_com_w_redu_q_i ; //( 3,  ( size_q + 6 )  ) ; //( robot.getNumberOfKinematicJoints() + 6 ))   ;
+  yarp::sig::Matrix J_com_aw_q_i ;
+  
+  
   yarp::sig::Matrix J_r_c1_aw ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ;
   yarp::sig::Matrix J_l_c1_aw ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ;
 
