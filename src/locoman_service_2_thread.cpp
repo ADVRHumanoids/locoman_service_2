@@ -24,7 +24,7 @@ locoman_service_2_thread::locoman_service_2_thread(
                              			yarp::os::ResourceFinder rf, 
                              			std::shared_ptr< paramHelp::ParamHelperServer > ph) :
                                         control_thread( module_prefix, rf, ph ),
-    size_q(robot.getNumberOfKinematicJoints()),
+    size_q(locoman::utils::getNumberOfKinematicJoints(robot)),
     q_sensed(size_q, 0.0) ,
     
     CoM_w_cmd(3, 0.0) ,
@@ -374,7 +374,7 @@ bool locoman_service_2_thread::custom_init()
     thread_param.sched_priority = 99;
     
     model.setFloatingBaseLink("Waist");
-    yarp::sig::Vector q_current(robot.getNumberOfKinematicJoints(),0.0) ; // = robot.sensePosition();
+    yarp::sig::Vector q_current(locoman::utils::getNumberOfKinematicJoints(robot),0.0) ; // = robot.sensePosition();
     robot.idynutils.updateiDyn3Model(q_current, true);
     
     
