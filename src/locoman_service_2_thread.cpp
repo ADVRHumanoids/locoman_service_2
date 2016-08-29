@@ -1033,14 +1033,26 @@ void locoman_service_2_thread::run()
 
   //-----------------------------------------------------------------------------------------------------------------------------------------------
   
+  /*  std::cout << "J_c_feet.toString()  = " <<  std::endl << J_c_feet.toString() << std::endl ;    
+   std::cout << "S_c_feet.toString()  = " <<  std::endl << S_c_feet.toString() << std::endl ;    
+   std::cout << "Q_aw_s_cont.toString()  = " <<  std::endl << Q_aw_s_cont.toString() << std::endl ;    
+   std::cout << "U_aw_s_cont.toString()  = " <<  std::endl << U_aw_s_cont.toString() << std::endl ;    
+   std::cout << "Kc.toString()  = " <<  std::endl << Kc.toString() << std::endl ;    
+  */
+  
+  
+  
   Rf_filt = locoman::utils::Rf_redu(J_c_feet, S_c_feet, Q_aw_s_cont, U_aw_s_cont, Kc ) ; 
-     /* if(cout_print){
+    
+
+  /* if(cout_print){
+    std::cout << "Rf_redu = " <<  std::endl << Rf_filt.toString() << std::endl ;    
     std::cout << "Rf_filt.rows() = " << Rf_filt.rows() << std::endl ;
     std::cout << "Rf_filt.cols() = " << Rf_filt.cols() << std::endl ;
     std::cout << "Rf_filt.toString() direct = " <<  std::endl << Rf_filt.toString() << std::endl ;    
     }*/   
   Rf_filt = locoman::utils::filter_SVD( Rf_filt ,  1E-10); 
-   //std::cout << "Rf_filt.toString() FILTERED = " <<  std::endl << Rf_filt.toString() << std::endl ;    
+  // std::cout << "Rf_filt.toString() FILTERED = " <<  std::endl << Rf_filt.toString() << std::endl ;    
 
 
   //------------------------------------------------------------------------
