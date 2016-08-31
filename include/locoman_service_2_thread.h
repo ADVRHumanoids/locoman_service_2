@@ -74,7 +74,7 @@ public:
     
     yarp::sig::Vector q_sensed ;
     
-    yarp::sig::Vector fc_sensors_received ;
+    yarp::sig::Vector fc_received ;
     //----------------
     
     yarp::sig::Vector CoM_w_cmd ;  // variables registered at command time
@@ -148,6 +148,7 @@ public:
   yarp::sig::Vector fc_l_foot ; //= map_l_fcToSens_PINV*fc_received.subVector(  0,5  ) ;
   yarp::sig::Vector fc_r_foot ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ; 
   yarp::sig::Vector fc_feet ;
+  yarp::sig::Vector fc_hands;
   
   yarp::sig::Vector fc_l_hand ; //= map_l_hand_fcToSens*fc_received.subVector( 12,17  ) ;
   yarp::sig::Vector fc_r_hand ; //= map_r_hand_fcToSens*fc_received.subVector( 18,23  ) ;  

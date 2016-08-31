@@ -41,7 +41,7 @@ locoman_service_2_thread::locoman_service_2_thread(
     //
     FC_HANDS_DES(FC_HANDS_size, 0.0) ,
   
-    fc_sensors_received(24, 0.0),
+    fc_received(48, 0.0),
     
 
   //---------------------------------
@@ -66,6 +66,7 @@ locoman_service_2_thread::locoman_service_2_thread(
   fc_l_foot(12, 0.0), // ; //= map_l_fcToSens_PINV*fc_received.subVector(  0,5  ) ;
   fc_r_foot(12, 0.0), // ; //= map_r_fcToSens_PINV*fc_received.subVector(  6,11  ) ;
   fc_feet(24, 0.0),
+  fc_hands(24, 0.0),
     
   fc_l_hand(12, 0.0), // ; //= map_l_hand_fcToSens*fc_received.subVector( 12,17  ) ;
   fc_r_hand(12, 0.0), // ;
@@ -728,18 +729,19 @@ void locoman_service_2_thread::run()
    
     //
     receiving_fc_vect = receiving_fc.read() ;            // 
-    fc_sensors_received = *receiving_fc_vect ; // sensor measures (after filetering and offset);  
+    fc_received = *receiving_fc_vect ; // sensor measures (after filetering and offset);  
     
      if(cout_print){ std::cout << "q_sensed = "  << q_sensed.toString() << std::endl ; 
-		     std::cout << "fc_received = "  << fc_sensors_received.toString() << std::endl ;  }
-// 
-    fc_l_foot = map_l_fcToSens_PINV      * fc_sensors_received.subVector(  0,5   ) ;
-    fc_r_foot = map_r_fcToSens_PINV      * fc_sensors_received.subVector(  6,11  ) ;
-    fc_feet.setSubvector(0, fc_l_foot) ;
-    fc_feet.setSubvector(fc_l_foot.length() , fc_r_foot) ;
+		     std::cout << "fc_received = "  << fc_received.toString() << std::endl ;  }
+  
+    fc_feet  = fc_received.subVector(  0,23   )  ;
+    fc_hands = fc_received.subVector(  24,47  ) ;;
     
-    fc_l_hand = map_l_hand_fcToSens_PINV * fc_sensors_received.subVector( 12,17  ) ;
-    fc_r_hand = map_r_hand_fcToSens_PINV * fc_sensors_received.subVector( 18,23  ) ;
+    fc_l_foot = fc_feet.subVector(  0,11  ) ;
+    fc_r_foot = fc_feet.subVector( 12,23  ) ;
+    
+    fc_l_hand = fc_hands.subVector(  0,11  ) ;
+    fc_r_hand = fc_hands.subVector( 12,23  ) ;
     
     fc_l1_foot_filt = fc_l_foot.subVector( 0,2 )  ;
     fc_l2_foot_filt = fc_l_foot.subVector( 3,5 )  ;
