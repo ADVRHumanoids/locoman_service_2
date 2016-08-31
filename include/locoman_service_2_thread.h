@@ -123,6 +123,7 @@ public:
     double kc ;
     yarp::sig::Matrix Kq ;
     yarp::sig::Matrix Kc ;
+    yarp::sig::Matrix Kc_f_h ;
     yarp::sig::Matrix Kc_f_rh ;
     yarp::sig::Vector ft_l_ankle ;
     yarp::sig::Vector ft_r_ankle ;
@@ -263,11 +264,17 @@ public:
   
   yarp::sig::Matrix Complete_Jac_feet ; //( 8*B.cols() , size_q + 6) ;    //  ( 24 , size_q + 6)  ;
   
+  yarp::sig::Matrix Complete_Jac_f_h ; // ( 16*B.cols() , size_q + 6) ;
+  
  // yarp::sig::Matrix J_feet ;  
   yarp::sig::Matrix J_c_feet ;      //  ( 24 , size_q ) ;
   yarp::sig::Matrix S_c_feet_T ;    //  ( 24 , 6 ) ; 
   yarp::sig::Matrix S_c_feet ;      //  ( 6 , 24 )   ; // = S_c_T.transposed() ;  
 
+  yarp::sig::Matrix J_c_f_h   ; //  = Complete_Jac_f_h.submatrix( 0,  Complete_Jac_f_h.rows()-1 , 6, Complete_Jac_f_h.cols()-1 ) ;
+  yarp::sig::Matrix S_c_f_h_T ; // = Complete_Jac_f_h.submatrix( 0,  Complete_Jac_f_h.rows()-1 , 0, 5 ) ;
+  yarp::sig::Matrix S_c_f_h   ; // 
+  
   yarp::sig::Matrix J_l_c1_mix_0 ; //( 6, ( size_q + 6 ) ) ; //
   yarp::sig::Matrix J_l_c2_mix_0 ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ; 
   yarp::sig::Matrix J_l_c3_mix_0 ; //( 6, ( size_q + 6 ) ) ; //robot.getNumberOfKinematicJoints() + 6 ) ) ; 
@@ -349,15 +356,21 @@ public:
   yarp::sig::Matrix Q_aw_r_c2 ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c2_spa_0, T_aw_r_c2_0, fc_r_c2_filt ) ; //(size_q+ 6, size_q + 6) ;
   yarp::sig::Matrix Q_aw_r_c3 ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c3_spa_0, T_aw_r_c3_0, fc_r_c3_filt ) ; //(size_q+ 6, size_q + 6) ; 
   yarp::sig::Matrix Q_aw_r_c4 ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c4_spa_0, T_aw_r_c4_0, fc_r_c4_filt ) ; //(size_q+ 6, size_q + 6) ;
+
+  yarp::sig::Matrix Q_aw_l1_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c1_spa_0, T_aw_r_c1_0, fc_r_c1_filt ) ; //(size_q+ 6, size_q + 6) ;
+  yarp::sig::Matrix Q_aw_l2_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c2_spa_0, T_aw_r_c2_0, fc_r_c2_filt ) ; //(size_q+ 6, size_q + 6) ;
+  yarp::sig::Matrix Q_aw_l3_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c3_spa_0, T_aw_r_c3_0, fc_r_c3_filt ) ; //(size_q+ 6, size_q + 6) ; 
+  yarp::sig::Matrix Q_aw_l4_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c4_spa_0, T_aw_r_c4_0, fc_r_c4_filt ) ; //(size_q+ 6, size_q + 6) ;
+    
+  yarp::sig::Matrix Q_aw_r1_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c1_spa_0, T_aw_r_c1_0, fc_r_c1_filt ) ; //(size_q+ 6, size_q + 6) ;
+  yarp::sig::Matrix Q_aw_r2_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c2_spa_0, T_aw_r_c2_0, fc_r_c2_filt ) ; //(size_q+ 6, size_q + 6) ;
+  yarp::sig::Matrix Q_aw_r3_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c3_spa_0, T_aw_r_c3_0, fc_r_c3_filt ) ; //(size_q+ 6, size_q + 6) ; 
+  yarp::sig::Matrix Q_aw_r4_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c4_spa_0, T_aw_r_c4_0, fc_r_c4_filt ) ; //(size_q+ 6, size_q + 6) ;
   
-//   yarp::sig::Matrix Q_aw_r1_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c1_spa_0, T_aw_r_c1_0, fc_r_c1_filt ) ; //(size_q+ 6, size_q + 6) ;
-//   yarp::sig::Matrix Q_aw_r2_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c2_spa_0, T_aw_r_c2_0, fc_r_c2_filt ) ; //(size_q+ 6, size_q + 6) ;
-//   yarp::sig::Matrix Q_aw_r3_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c3_spa_0, T_aw_r_c3_0, fc_r_c3_filt ) ; //(size_q+ 6, size_q + 6) ; 
-//   yarp::sig::Matrix Q_aw_r4_hand ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_r_c4_spa_0, T_aw_r_c4_0, fc_r_c4_filt ) ; //(size_q+ 6, size_q + 6) ;
-//   
   yarp::sig::Matrix Q_aw_l_tot ; //(size_q+ 6, size_q + 6)   ; // = Q_aw_l_c1 + Q_aw_l_c2 + Q_aw_l_c3 + Q_aw_l_c4;
   yarp::sig::Matrix Q_aw_r_tot ; //(size_q+ 6, size_q + 6)   ; // = Q_aw_r_c1 + Q_aw_r_c2 + Q_aw_r_c3 + Q_aw_r_c4;
-  //yarp::sig::Matrix Q_aw_r_hand_tot ; //(size_q+ 6, size_q + 6)   ; // = Q_aw_r_c1 + Q_aw_r_c2 + Q_aw_r_c3 + Q_aw_r_c4;
+  yarp::sig::Matrix Q_aw_l_hand_tot ; 
+  yarp::sig::Matrix Q_aw_r_hand_tot ; //(size_q+ 6, size_q + 6)   ; // = Q_aw_r_c1 + Q_aw_r_c2 + Q_aw_r_c3 + Q_aw_r_c4;
 
   yarp::sig::Matrix Q_aw_c ; //(size_q+ 6, size_q + 6)   ; // =  Q_aw_l_tot + Q_aw_r_tot ;  
   yarp::sig::Matrix U_aw_s_cont ; //( 6 , 6) ; // = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
@@ -366,6 +379,10 @@ public:
   yarp::sig::Matrix Q_aw_c_f_rh ; //(size_q+ 6, size_q + 6)   ; // =  Q_aw_l_tot + Q_aw_r_tot ;  
   yarp::sig::Matrix U_aw_s_c_f_rh ; //( 6 , 6) ; // = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
   yarp::sig::Matrix Q_aw_s_c_f_rh ; //( 6 , size_q ) ; //  = Q_aw_c.submatrix( 0  , 5,  6,  (Q_aw_c.cols()-1)  ) ;
+ 
+  yarp::sig::Matrix Q_aw_c_f_h ; // = Q_aw_c + Q_aw_l_hand_tot + Q_aw_r_hand_tot ;
+  yarp::sig::Matrix U_aw_s_f_h ; // = Q_aw_c_f_h.submatrix( 0 ,  5 , 0, 5) ;     
+  yarp::sig::Matrix Q_aw_s_f_h ; //
   //----------------------------------------------------------------------------------------
   
   yarp::sig::Matrix FLMM   ;   //    (30, size_q + 30)  ;  //= locoman::utils::FLMM_redu(J_c, S_c, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
@@ -373,6 +390,7 @@ public:
   yarp::sig::Matrix Rf     ;   //   (24, size_q)   ; 
   yarp::sig::Matrix Rf_filt  ; //   (24, size_q) ;
   yarp::sig::Matrix Rf_filt_pinv  ; //   ( size_q, 24) ;
+  yarp::sig::Matrix Rf_filt_f_h ;
   
   yarp::sig::Matrix Big_J_new ;
   yarp::sig::Matrix Big_Rf_new ;
