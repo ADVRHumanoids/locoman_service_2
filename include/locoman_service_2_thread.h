@@ -12,7 +12,7 @@
 class locoman_service_2_thread : public control_thread
 {
 private:  
-    
+    // --- YARP PORT SECTION ---
    // yarp::os::BufferedPort<yarp::sig::Vector> from_locoman_thread;
    // yarp::sig::Vector* v_from_locoman_thread;
   
@@ -27,6 +27,8 @@ private:
     //yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_thread;
 
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Matrix;
+    yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_J;
+    yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_Rf;
     
 public:
     //iDynUtils new_Robot ; //   iDynUtils new_Robot("new_Robot",get_urdf_path(),get_srdf_path()) ;
@@ -370,6 +372,9 @@ public:
   yarp::sig::Matrix Rf     ;   //   (24, size_q)   ; 
   yarp::sig::Matrix Rf_filt  ; //   (24, size_q) ;
   yarp::sig::Matrix Rf_filt_pinv  ; //   ( size_q, 24) ;
+  
+  yarp::sig::Matrix Big_J_new ;
+  yarp::sig::Matrix Big_Rf_new ;
   
   yarp::sig::Vector d_fc_des_to_world ; //(size_fc)  ;
   yarp::sig::Vector d_EE_r_des ; //(6,0.0) ;
