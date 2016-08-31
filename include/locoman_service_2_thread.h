@@ -34,6 +34,7 @@ public:
     //iDynUtils new_Robot ; //   iDynUtils new_Robot("new_Robot",get_urdf_path(),get_srdf_path()) ;
 
     int mg =  1200 ;
+
     unsigned int size_q ;
     unsigned int waist_index ;
     unsigned int l_ankle_index ;
@@ -71,6 +72,7 @@ public:
     yarp::sig::Matrix T_waist_r_hand_cmd ; 
     yarp::sig::Matrix R_waist_aw_cmd ;     
     
+    yarp::sig::Vector mg_vect ;
     
     yarp::sig::Vector q_sensed ;
     
@@ -346,6 +348,7 @@ public:
   yarp::sig::Matrix J_aw_r4_hand_spa_0 ; //= locoman::utils::Adjoint(T_aw_r4_hand_0)* J_r4_hand_mix_0 ; // locoman::utils::Adjoint( T_aw_waist_0)* J_waist_r_c4_spa_0 ;
   
   //-----------------------------------------------------------
+  yarp::sig::Matrix Q_mg ;
   
   yarp::sig::Matrix Q_aw_l_c1 ; //(size_q+ 6, size_q + 6)   ; //= Q_ci(J_aw_l_c1_spa_0, T_aw_l_c1_0, fc_l_c1_filt ) ;
   yarp::sig::Matrix Q_aw_l_c2 ; //(size_q+ 6, size_q + 6)   ; // = Q_ci(J_aw_l_c2_spa_0, T_aw_l_c2_0, fc_l_c2_filt ) ; // (size_q+ 6, size_q + 6) ;

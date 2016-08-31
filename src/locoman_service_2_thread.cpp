@@ -42,7 +42,7 @@ locoman_service_2_thread::locoman_service_2_thread(
     FC_HANDS_DES(FC_HANDS_size, 0.0) ,
   
     fc_received(48, 0.0),
-    
+    mg_vect(3,0.0) ,
 
   //---------------------------------
     // number of fc components on the feet
@@ -266,6 +266,8 @@ locoman_service_2_thread::locoman_service_2_thread(
   J_aw_r4_hand_spa_0( 6, ( size_q + 6 ) ) , // = locoman::utils::Adjoint(T_aw_r4_hand_0)* J_r4_hand_mix_0 ; // locoman::utils::Adjoint( T_aw_waist_0)* J_waist_r_c4_spa_0 ;
   
   //------------------------------------------------
+  Q_mg(size_q+ 6, size_q + 6)   , 
+  
   Q_aw_l_c1(size_q+ 6, size_q + 6)   , //= Q_ci(J_aw_l_c1_spa_0, T_aw_l_c1_0, fc_l_c1_filt ) ;
   Q_aw_l_c2(size_q+ 6, size_q + 6)   , // = Q_ci(J_aw_l_c2_spa_0, T_aw_l_c2_0, fc_l_c2_filt ) ; // (size_q+ 6, size_q + 6) ;
   Q_aw_l_c3(size_q+ 6, size_q + 6)   , // = Q_ci(J_aw_l_c3_spa_0, T_aw_l_c3_0, fc_l_c3_filt ) ; //(size_q+ 6, size_q + 6) ; 
@@ -669,6 +671,8 @@ bool locoman_service_2_thread::custom_init()
   J_aw_r4_hand_spa_0.zero()  ;
   
   ////------------------------------------------------
+  Q_mg.zero();
+  
   Q_aw_l_c1.zero()  ;
   Q_aw_l_c2.zero()  ;
   Q_aw_l_c3.zero()  ;
@@ -1073,9 +1077,9 @@ void locoman_service_2_thread::run()
   //-----------------------------------------------------------------------------------------------------------------------------
   // Derivative terms of the gravitational term
   
-  yarp::sig::Vector mg_vect(3,0.0) ;
+  //yarp::sig::Vector mg_vect(3,0.0) ;
   mg_vect[2] = -mg ;
-  yarp::sig::Matrix Q_mg = locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ;
+  Q_mg = locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ;
     
   //------------------------------------------------------------------------------------------------------
   // FEET 
