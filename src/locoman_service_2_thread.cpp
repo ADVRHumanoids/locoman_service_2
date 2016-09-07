@@ -307,9 +307,15 @@ locoman_service_2_thread::locoman_service_2_thread(
   
   FLMM(30, size_q + 30)  ,  //= locoman::utils::FLMM_redu(J_c, S_c, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
   cFLMM( 30, size_q + 30 ) ,
+  FLMM_old( 30, size_q + 30 ) , 
+  cFLMM_old( 30, size_q + 30 ) ,
   Rf(24, size_q)   ,
   Rf_filt(24, size_q) ,
   Rf_filt_pinv( size_q, 24) ,
+  Rf_feet_old( size_q, 24)  , 
+  Rf_feet_old_filt( size_q, 24) ,
+  
+  Rf_old_locoman( size_q, 24) ,
     
   Rf_filt_f_h(48, size_q) ,  
     
@@ -397,6 +403,8 @@ bool locoman_service_2_thread::custom_init()
     to_locoman_Big_J.open(std::string("/" + get_module_prefix() + "/sending_Big_J"));   
 
     to_locoman_Big_Rf.open(std::string("/" + get_module_prefix() + "/sending_Big_Rf"));   
+
+    to_locoman_Rf_old.open(std::string("/" + get_module_prefix() + "/sending_Rf_old"));   
 
     // end of YARP Port Section
     //---------------------------------------------------------
@@ -715,6 +723,9 @@ bool locoman_service_2_thread::custom_init()
   Rf_filt.zero()  ;   //   (24, size_q) ,
   Rf_filt_pinv.zero()  ;   //   ( size_q, 24) ,
   Rf_filt_f_h.zero() ;
+  Rf_feet_old.zero()  ; 
+  Rf_feet_old_filt.zero(); 
+  Rf_old_locoman.zero() ;
   Big_J_new.zero() ;
   Big_Rf_new.zero() ;
   // 
@@ -1086,6 +1097,10 @@ void locoman_service_2_thread::run()
   Q_aw_l_tot = Q_aw_l_c1 + Q_aw_l_c2 + Q_aw_l_c3 + Q_aw_l_c4;
   Q_aw_r_tot = Q_aw_r_c1 + Q_aw_r_c2 + Q_aw_r_c3 + Q_aw_r_c4;
   
+  yarp::sig::Matrix Q_aw_old =  Q_aw_l_tot + Q_aw_r_tot ;  
+  yarp::sig::Matrix U_aw_s_old = Q_aw_old.submatrix( 0 ,  5 , 0, 5) ;     
+  yarp::sig::Matrix Q_aw_s_old = Q_aw_old.submatrix( 0  , 5,  6,  (Q_aw_old.cols()-1)  ) ;
+  
   Q_aw_c =  Q_aw_l_tot + Q_aw_r_tot + Q_mg ;  
  
   U_aw_s_cont = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
@@ -1172,6 +1187,26 @@ void locoman_service_2_thread::run()
   data_Big_Rf.resize(Big_Rf_new.rows(), Big_Rf_new.cols());
   data_Big_Rf = Big_Rf_new ;
   to_locoman_Big_Rf.write();  
+  
+  //--------------------------------------------------------------------
+  // Rf_feet_old
+  //-----------------------------------------------------------------------------------------------------
+
+  FLMM_old  = locoman::utils::FLMM_redu(J_c_feet, S_c_feet, Q_aw_s_old, U_aw_s_old, Kc ) ;
+  cFLMM_old = locoman::utils::Pinv_trunc_SVD(FLMM_old.submatrix(0, FLMM_old.rows()-1 , 0, FLMM_old.rows()-1), 1E-10 ) * FLMM_old;
+   
+  Rf_feet_old = cFLMM_old.submatrix(0, size_fc-1, cFLMM_old.cols()-size_q, cFLMM_old.cols()-1) ;  
+  Rf_feet_old_filt = locoman::utils::filter_SVD( Rf_feet_old,  1E-10); 
+
+  Rf_old_locoman = Rf_feet_old_filt ;
+  yarp::sig::Matrix &data_Rf_old = to_locoman_Rf_old.prepare();
+  data_Rf_old.resize(Rf_old_locoman.rows(), Rf_old_locoman.cols());
+  data_Rf_old = Rf_old_locoman ;
+  to_locoman_Rf_old.write();
+  
+  //----------------------------------------------------------------------
+ 
+
   
   
   toc = locoman::utils::Toc(tic) ;

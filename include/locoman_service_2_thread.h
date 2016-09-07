@@ -29,6 +29,7 @@ private:
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Matrix;
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_J;
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_Rf;
+    yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Rf_old;
     
 public:
     //iDynUtils new_Robot ; //   iDynUtils new_Robot("new_Robot",get_urdf_path(),get_srdf_path()) ;
@@ -390,11 +391,17 @@ public:
   
   yarp::sig::Matrix FLMM   ;   //    (30, size_q + 30)  ;  //= locoman::utils::FLMM_redu(J_c, S_c, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
   yarp::sig::Matrix cFLMM  ;   //   ( 30, size_q + 30 ) ;
+  yarp::sig::Matrix FLMM_old ; 
+  yarp::sig::Matrix cFLMM_old ;
   yarp::sig::Matrix Rf     ;   //   (24, size_q)   ; 
   yarp::sig::Matrix Rf_filt  ; //   (24, size_q) ;
   yarp::sig::Matrix Rf_filt_pinv  ; //   ( size_q, 24) ;
   yarp::sig::Matrix Rf_filt_f_h ;
-  
+  yarp::sig::Matrix Rf_feet_old  ; //= cFLMM_old.submatrix(0, size_fc-1, cFLMM_old.cols()-size_q, cFLMM_old.cols()-1) ;  
+  yarp::sig::Matrix Rf_feet_old_filt ; 
+
+  yarp::sig::Matrix Rf_old_locoman ;
+ 
   yarp::sig::Matrix Big_J_new ;
   yarp::sig::Matrix Big_Rf_new ;
   
