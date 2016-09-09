@@ -1132,15 +1132,32 @@ void locoman_service_2_thread::run()
   
   Rf_filt = locoman::utils::Rf_redu(J_c_feet, S_c_feet, Q_aw_s_cont, U_aw_s_cont, Kc ) ; 
     
+  
+  FLMM = locoman::utils::FLMM_redu(J_c_feet, S_c_feet, Q_aw_s_cont, U_aw_s_cont, Kc ) ;
+  cFLMM = locoman::utils::Pinv_trunc_SVD(FLMM.submatrix(0, FLMM.rows()-1 , 0, FLMM.rows()-1), 1E-10 ) * FLMM ;
+  
+  Rf_filt = cFLMM.submatrix(0, size_fc-1, cFLMM.cols()-size_q, cFLMM.cols()-1) ;  
+  Rf_filt = locoman::utils::filter_SVD( Rf_filt,  1E-10);
+  
+  
+  /*
+   FLMM_old  = locoman::utils::FLMM_redu(J_c_feet, S_c_feet, Q_aw_s_old, U_aw_s_old, Kc ) ;
+  cFLMM_old = locoman::utils::Pinv_trunc_SVD(FLMM_old.submatrix(0, FLMM_old.rows()-1 , 0, FLMM_old.rows()-1), 1E-10 ) * FLMM_old;
+   
+  Rf_feet_old = cFLMM_old.submatrix(0, size_fc-1, cFLMM_old.cols()-size_q, cFLMM_old.cols()-1) ;  
+  Rf_feet_old_filt = locoman::utils::filter_SVD( Rf_feet_old,  1E-10); */
+  
+  
   /* if(cout_print){
     std::cout << "Rf_redu = " <<  std::endl << Rf_filt.toString() << std::endl ;    
     std::cout << "Rf_filt.rows() = " << Rf_filt.rows() << std::endl ;
     std::cout << "Rf_filt.cols() = " << Rf_filt.cols() << std::endl ;
     std::cout << "Rf_filt.toString() direct = " <<  std::endl << Rf_filt.toString() << std::endl ;    
     }*/   
-  Rf_filt = locoman::utils::filter_SVD( Rf_filt ,  1E-10); 
   // std::cout << "Rf_filt.toString() FILTERED = " <<  std::endl << Rf_filt.toString() << std::endl ;    
 
+  /*-------------------------------------------------------------------------------
+  
   Rf_filt_f_h = locoman::utils::Rf_redu(J_c_f_h, S_c_f_h, Q_aw_s_f_h, U_aw_s_f_h, Kc_f_h ) ; 
   Rf_filt_f_h = locoman::utils::filter_SVD( Rf_filt_f_h , 1E-10); 
 
