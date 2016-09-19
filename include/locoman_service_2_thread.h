@@ -30,6 +30,8 @@ private:
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_J;
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Big_Rf;
     yarp::os::BufferedPort<yarp::sig::Matrix> to_locoman_Rf_old;
+
+    yarp::os::BufferedPort<yarp::sig::Matrix> to_multicontact_Big_Rf;
     
 public:
     //iDynUtils new_Robot ; //   iDynUtils new_Robot("new_Robot",get_urdf_path(),get_srdf_path()) ;

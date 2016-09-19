@@ -406,6 +406,9 @@ bool locoman_service_2_thread::custom_init()
 
     to_locoman_Rf_old.open(std::string("/" + get_module_prefix() + "/sending_Rf_old"));   
 
+    to_multicontact_Big_Rf.open(std::string("/" + get_module_prefix() + "/sending_multicontact_Big_Rf"));   
+
+    
     // end of YARP Port Section
     //---------------------------------------------------------
    
@@ -816,6 +819,9 @@ void locoman_service_2_thread::run()
     fc_r3_hand_filt = fc_r_hand.subVector( 0,2 )  ;
     fc_r4_hand_filt = fc_r_hand.subVector( 0,2 )  ;    
   
+    
+    int l_sole_index = model.iDyn3_model.getLinkIndex("l_sole") ;
+    int r_sole_index = model.iDyn3_model.getLinkIndex("r_sole") ;  // TODO: remove
   //-------------------------------------------------------------------------------------------------------------    
   // Using the old one
   // Defining Useful Transformations
@@ -851,6 +857,8 @@ void locoman_service_2_thread::run()
   T_w_r3_hand_0 = model.iDyn3_model.getPosition(r_hand_c3_index)    ;
   T_w_r4_hand_0 = model.iDyn3_model.getPosition(r_hand_c4_index)    ;     
   
+  yarp::sig::Matrix T_w_l_sole_0 =  model.iDyn3_model.getPosition(l_sole_index)    ; 
+  yarp::sig::Matrix T_w_r_sole_0 =  model.iDyn3_model.getPosition(r_sole_index)    ; // TODO: remove
   //-----------------------------------------------------------------------
   T_waist_w_0   = locoman::utils::iHomogeneous(T_w_waist_0)  ;
   T_l_ankle_w_0 = locoman::utils::iHomogeneous(T_w_l_ankle_0) ;
@@ -877,7 +885,13 @@ void locoman_service_2_thread::run()
   T_r3_hand_w_0 = locoman::utils::iHomogeneous(T_w_r3_hand_0) ;
   T_r4_hand_w_0 = locoman::utils::iHomogeneous(T_w_r4_hand_0) ;    
 
- // ---------------------------------------------------------------------
+  
+  yarp::sig::Matrix T_l_sole_w_0 = locoman::utils::iHomogeneous(T_w_l_sole_0) ; 
+  yarp::sig::Matrix T_r_sole_w_0 = locoman::utils::iHomogeneous(T_w_r_sole_0) ; // TODO: remove
+
+  
+  // ---------------------------------------------------------------------
+  
   
   T_l_hand_w_0 = locoman::utils::iHomogeneous(T_w_l_hand_0) ;
   T_r_hand_w_0 = locoman::utils::iHomogeneous(T_w_r_hand_0) ;   
@@ -902,6 +916,8 @@ void locoman_service_2_thread::run()
   T_aw_r3_hand_0 = T_aw_w_0 * T_w_r3_hand_0 ;
   T_aw_r4_hand_0 = T_aw_w_0 * T_w_r4_hand_0 ; 
   
+  yarp::sig::Matrix T_aw_l_sole_0 = T_aw_w_0*T_w_l_sole_0 ; 
+  yarp::sig::Matrix T_aw_r_sole_0 = T_aw_w_0*T_w_r_sole_0 ;  // TODO: remove
 
   //-----------------------------------------------------
   model.iDyn3_model.getJacobian( l_c1_index, J_l_c1_mix_0, false  ) ; //false= mixed version jacobian //true= body jacobian
@@ -927,6 +943,15 @@ void locoman_service_2_thread::run()
   model.iDyn3_model.getJacobian( l_hand_index, J_l_hand_mix_0, false  ) ; //false= mixed version jacobian //true= body jacobian
   model.iDyn3_model.getJacobian( r_hand_index, J_r_hand_mix_0, false  ) ; //false= mixed version jacobian //true= body jacobian
 
+  yarp::sig::Matrix J_l_sole_mix_0(6,size_q+6 ) ;
+  yarp::sig::Matrix J_r_sole_mix_0(6,size_q+6 ) ;
+  model.iDyn3_model.getJacobian( l_sole_index, J_l_sole_mix_0, false  ) ; 
+  model.iDyn3_model.getJacobian( r_sole_index, J_r_sole_mix_0, false  ) ; // TODO: remove
+
+    
+  
+  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   J_l_c1_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_l_c1_w_0), zero_3 ))* J_l_c1_mix_0 ;
   J_l_c2_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_l_c2_w_0), zero_3 ))* J_l_c2_mix_0 ;
   J_l_c3_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_l_c3_w_0), zero_3 ))* J_l_c3_mix_0 ;
@@ -949,6 +974,10 @@ void locoman_service_2_thread::run()
   J_r2_hand_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_r2_hand_w_0), zero_3 ))* J_r2_hand_mix_0 ;
   J_r3_hand_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_r3_hand_w_0), zero_3 ))* J_r3_hand_mix_0 ;
   J_r4_hand_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_r4_hand_w_0), zero_3 ))* J_r4_hand_mix_0 ;
+  
+  yarp::sig::Matrix J_l_sole_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_l_sole_w_0), zero_3 ))* J_l_sole_mix_0  ;
+  yarp::sig::Matrix J_r_sole_body_0 = locoman::utils::Adjoint( locoman::utils::Homogeneous(locoman::utils::getRot(T_r_sole_w_0), zero_3 ))* J_r_sole_mix_0  ;
+  //TOO: remov
   
   //---------------------------------------------------------------------------------------------------------------------------------------------------------------
   //Introducing Spatial Jacobian terms: Fixed base in {AW}
@@ -973,6 +1002,11 @@ void locoman_service_2_thread::run()
   J_aw_r3_hand_spa_0 = locoman::utils::Adjoint(T_aw_r3_hand_0)* J_r3_hand_mix_0 ; // locoman::utils::Adjoint( T_aw_waist_0)* J_waist_r_c3_spa_0 ;
   J_aw_r4_hand_spa_0 = locoman::utils::Adjoint(T_aw_r4_hand_0)* J_r4_hand_mix_0 ; // locoman::utils::Adjoint( T_aw_waist_0)* J_waist_r_c4_spa_0 ; 
  
+  yarp::sig::Matrix J_aw_l_sole_spa_0 = locoman::utils::Adjoint(T_aw_l_sole_0)* J_l_sole_mix_0 ; // locoman::utils::Adjoint( T_aw_waist_0)* J_waist_r_c3_spa_0 ;
+  yarp::sig::Matrix J_aw_r_sole_spa_0 = locoman::utils::Adjoint(T_aw_r_sole_0)* J_r_sole_mix_0 ;
+  //TODO: remove
+  //---------------------------------------------------------
+  
   J_aw_l_c1_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
   J_aw_l_c2_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
   J_aw_l_c3_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
@@ -992,6 +1026,9 @@ void locoman_service_2_thread::run()
   J_aw_r2_hand_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
   J_aw_r3_hand_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
   J_aw_r4_hand_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
+  
+  J_aw_l_sole_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;  // TODO : remove
+  J_aw_r_sole_spa_0.setSubmatrix( Eye_6, 0 ,  0 )  ;
   
   //Recomputing body Jacobian
 
@@ -1014,6 +1051,9 @@ void locoman_service_2_thread::run()
   J_r2_hand_body_0 = locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_aw_r2_hand_0) ) * J_aw_r2_hand_spa_0 ;
   J_r3_hand_body_0 = locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_aw_r3_hand_0) ) * J_aw_r3_hand_spa_0 ;
   J_r4_hand_body_0 = locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_aw_r4_hand_0) ) * J_aw_r4_hand_spa_0 ;
+  
+  J_l_sole_body_0 = locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_aw_l_sole_0) ) * J_aw_l_sole_spa_0 ;
+  J_r_sole_body_0 = locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_aw_r_sole_0) ) * J_aw_r_sole_spa_0 ;
  //------------------------------------------------------------------------------------------------------------
    
   //Stance and Jacobian Matrices
@@ -1090,7 +1130,7 @@ void locoman_service_2_thread::run()
   
   //yarp::sig::Vector mg_vect(3,0.0) ;
   mg_vect[2] = -mg ;
-  Q_mg = locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ;
+  Q_mg = 0.0*locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ; // TODO debug this function
     
   //------------------------------------------------------------------------------------------------------
   // FEET 
@@ -1188,8 +1228,8 @@ void locoman_service_2_thread::run()
   // Big_J_new[0][0] =1.0 ;
   Big_J_new.setSubmatrix(J_l_hand_body_0, 0,0 ) ;
   Big_J_new.setSubmatrix(J_r_hand_body_0, 6,0 ) ;
-  Big_J_new.setSubmatrix(J_l_c1_body_0,  12,0 ) ;    
-  Big_J_new.setSubmatrix(J_r_c1_body_0,  18,0 ) ;
+  Big_J_new.setSubmatrix(J_l_sole_body_0,  12,0 ) ;     // J_l_c1_body_0  // TODO : remove
+  Big_J_new.setSubmatrix(J_r_sole_body_0,  18,0 ) ;     // J_r_c1_body_0
   Big_J_new.setSubmatrix(J_com_waist,    24,0 ) ;
   
   yarp::sig::Matrix &data_Big_J = to_locoman_Big_J.prepare();
@@ -1204,6 +1244,13 @@ void locoman_service_2_thread::run()
   data_Big_Rf.resize(Big_Rf_new.rows(), Big_Rf_new.cols());
   data_Big_Rf = Big_Rf_new ;
   to_locoman_Big_Rf.write();  
+  
+ // Big_Rf_new = Rf_filt_f_h ;
+  yarp::sig::Matrix &data_multicontact_Big_Rf = to_multicontact_Big_Rf.prepare();
+  data_multicontact_Big_Rf.resize(Big_Rf_new.rows(), Big_Rf_new.cols());
+  data_multicontact_Big_Rf = Big_Rf_new ;
+  to_multicontact_Big_Rf.write();  
+  
   
   //--------------------------------------------------------------------
   // Rf_feet_old
