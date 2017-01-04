@@ -826,7 +826,10 @@ void locoman_service_2_thread::run()
   // Using the old one
   // Defining Useful Transformations
 
-  T_w_aw_0  = locoman::utils::AW_world_posture(model, robot) ;  
+//   T_w_aw_0  = locoman::utils::AW_world_posture(model, robot) ;  
+    bool SIMULATION_ROBOTRAN = true; // TODO read from cmake
+    T_w_aw_0  = locoman::utils::AW_world_posture(model, robot, SIMULATION_ROBOTRAN) ;  
+    
   T_aw_w_0 = locoman::utils::iHomogeneous(T_w_aw_0) ;    
 
   T_w_waist_0   = model.iDyn3_model.getPosition(waist_index) ;  
