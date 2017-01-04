@@ -1115,22 +1115,22 @@ void locoman_service_2_thread::run()
   Q_aw_r_c3 = locoman::utils::Q_ci(J_aw_r_c3_spa_0, T_aw_r_c3_0, fc_r3_foot_filt ) ; //(size_q+ 6, size_q + 6) ; 
   Q_aw_r_c4 = locoman::utils::Q_ci(J_aw_r_c4_spa_0, T_aw_r_c4_0, fc_r4_foot_filt ) ; //(size_q+ 6, size_q + 6) ;
   
-  Q_aw_l1_hand = locoman::utils::Q_ci(J_aw_l1_hand_spa_0, T_aw_l1_hand_0, fc_l1_hand_filt ) ; //(size_q+ 6, size_q + 6) ;  
-  Q_aw_l2_hand = locoman::utils::Q_ci(J_aw_l2_hand_spa_0, T_aw_l2_hand_0, fc_l2_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
-  Q_aw_l3_hand = locoman::utils::Q_ci(J_aw_l3_hand_spa_0, T_aw_l3_hand_0, fc_l3_hand_filt ) ; //(size_q+ 6, size_q + 6) ; 
-  Q_aw_l4_hand = locoman::utils::Q_ci(J_aw_l4_hand_spa_0, T_aw_l4_hand_0, fc_l4_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
-  
-  Q_aw_r1_hand = locoman::utils::Q_ci(J_aw_r1_hand_spa_0, T_aw_r1_hand_0, fc_r1_hand_filt ) ; //(size_q+ 6, size_q + 6) ;  
-  Q_aw_r2_hand = locoman::utils::Q_ci(J_aw_r2_hand_spa_0, T_aw_r2_hand_0, fc_r2_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
-  Q_aw_r3_hand = locoman::utils::Q_ci(J_aw_r3_hand_spa_0, T_aw_r3_hand_0, fc_r3_hand_filt ) ; //(size_q+ 6, size_q + 6) ; 
-  Q_aw_r4_hand = locoman::utils::Q_ci(J_aw_r4_hand_spa_0, T_aw_r4_hand_0, fc_r4_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
+//   Q_aw_l1_hand = locoman::utils::Q_ci(J_aw_l1_hand_spa_0, T_aw_l1_hand_0, fc_l1_hand_filt ) ; //(size_q+ 6, size_q + 6) ;  
+//   Q_aw_l2_hand = locoman::utils::Q_ci(J_aw_l2_hand_spa_0, T_aw_l2_hand_0, fc_l2_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
+//   Q_aw_l3_hand = locoman::utils::Q_ci(J_aw_l3_hand_spa_0, T_aw_l3_hand_0, fc_l3_hand_filt ) ; //(size_q+ 6, size_q + 6) ; 
+//   Q_aw_l4_hand = locoman::utils::Q_ci(J_aw_l4_hand_spa_0, T_aw_l4_hand_0, fc_l4_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
+//   
+//   Q_aw_r1_hand = locoman::utils::Q_ci(J_aw_r1_hand_spa_0, T_aw_r1_hand_0, fc_r1_hand_filt ) ; //(size_q+ 6, size_q + 6) ;  
+//   Q_aw_r2_hand = locoman::utils::Q_ci(J_aw_r2_hand_spa_0, T_aw_r2_hand_0, fc_r2_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
+//   Q_aw_r3_hand = locoman::utils::Q_ci(J_aw_r3_hand_spa_0, T_aw_r3_hand_0, fc_r3_hand_filt ) ; //(size_q+ 6, size_q + 6) ; 
+//   Q_aw_r4_hand = locoman::utils::Q_ci(J_aw_r4_hand_spa_0, T_aw_r4_hand_0, fc_r4_hand_filt ) ; //(size_q+ 6, size_q + 6) ;
 
   //-----------------------------------------------------------------------------------------------------------------------------
   // Derivative terms of the gravitational term
   
   //yarp::sig::Vector mg_vect(3,0.0) ;
   mg_vect[2] = -mg ;
-  Q_mg = 0.0*locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ; // TODO debug this function
+  Q_mg = 0.0*locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ; // TODO debug this function // FIXME
     
   //------------------------------------------------------------------------------------------------------
   // FEET 
@@ -1146,11 +1146,11 @@ void locoman_service_2_thread::run()
   U_aw_s_cont = Q_aw_c.submatrix( 0 ,  5 , 0, 5) ;     
   Q_aw_s_cont = Q_aw_c.submatrix( 0  , 5,  6,  (Q_aw_c.cols()-1)  ) ;
 
-  // FEET AND HANDS 
- 
-  Q_aw_c_f_h = Q_aw_c + Q_aw_l_hand_tot + Q_aw_r_hand_tot ;
-  U_aw_s_f_h = Q_aw_c_f_h.submatrix( 0 ,  5 , 0, 5) ;     
-  Q_aw_s_f_h = Q_aw_c_f_h.submatrix( 0  , 5,  6,  (Q_aw_c_f_h.cols()-1)  ) ;
+//   // FEET AND HANDS 
+//  
+//   Q_aw_c_f_h = Q_aw_c + Q_aw_l_hand_tot + Q_aw_r_hand_tot ;
+//   U_aw_s_f_h = Q_aw_c_f_h.submatrix( 0 ,  5 , 0, 5) ;     
+//   Q_aw_s_f_h = Q_aw_c_f_h.submatrix( 0  , 5,  6,  (Q_aw_c_f_h.cols()-1)  ) ;
 
   //-----------------------------------------------------------------------------------------------------
   
@@ -1181,8 +1181,8 @@ void locoman_service_2_thread::run()
   Rf_filt = locoman::utils::filter_SVD( Rf_filt ,  1E-10); 
   // std::cout << "Rf_filt.toString() FILTERED = " <<  std::endl << Rf_filt.toString() << std::endl ;    
 
-  Rf_filt_f_h = locoman::utils::Rf_redu(J_c_f_h, S_c_f_h, Q_aw_s_f_h, U_aw_s_f_h, Kc_f_h ) ; 
-  Rf_filt_f_h = locoman::utils::filter_SVD( Rf_filt_f_h , 1E-10); 
+//   Rf_filt_f_h = locoman::utils::Rf_redu(J_c_f_h, S_c_f_h, Q_aw_s_f_h, U_aw_s_f_h, Kc_f_h ) ; 
+//   Rf_filt_f_h = locoman::utils::filter_SVD( Rf_filt_f_h , 1E-10); 
 
   //------------------------------------------------------------------------
 /*
@@ -1222,7 +1222,7 @@ void locoman_service_2_thread::run()
     
 //   Big_Rf_new = locoman::utils::Rf_redu(J_c_f_h, S_c_f_h, Q_aw_s_cont, U_aw_s_cont, Kc ) ; 
 //   Big_Rf_new.zero() ;
-  Big_Rf_new = Rf_filt_f_h ;
+  Big_Rf_new = Rf_filt ;
   yarp::sig::Matrix &data_Big_Rf = to_locoman_Big_Rf.prepare();
   data_Big_Rf.resize(Big_Rf_new.rows(), Big_Rf_new.cols());
   data_Big_Rf = Big_Rf_new ;
