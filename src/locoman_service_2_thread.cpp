@@ -1128,8 +1128,8 @@ void locoman_service_2_thread::run()
   // Derivative terms of the gravitational term
   
   //yarp::sig::Vector mg_vect(3,0.0) ;
-  mg_vect[2] = -mg ;
-  Q_mg = 0.0*locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ; // TODO debug this function // FIXME
+  mg_vect[2] = mg ;
+  Q_mg = 1.0*locoman::utils::Q_mg( q_sensed, mg_vect, T_aw_w_0 , robot) ; // TODO debug this function // FIXME SHOULD BE OK NOW
     
   //------------------------------------------------------------------------------------------------------
   // FEET 
