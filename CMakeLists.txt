@@ -26,6 +26,9 @@ endif(COMMAND cmake_policy)
 include(ExternalProject)
 project(locoman_service_2)
 
+# find first YCM in order to have ${YCM_MODULE_PATH} defined for 3rd party software like Eigen3
+find_package(YCM REQUIRED)
+
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
